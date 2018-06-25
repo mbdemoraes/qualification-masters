@@ -1,0 +1,134 @@
+\chapter{Introdução}\label{chp:Introducao}
+
+Com o avanço tecnológico e a difusão de tecnologias acessíveis para todas as camadas da sociedade, o volume de dados gerados diariamente impressiona. De acordo com \citeonline{Dobre2014}, 2,5 Exabyte de dados são gerados todos os dias. Isso implica que 90\% de todo conteúdo digital existente atualmente foi criado apenas nos últimos dois anos. 
+Esse conjunto de dados em constante crescimento, transmitido em altas velocidades e que torna cada vez difícil mais seu armazenamento em bancos de dados tradicionais, é conhecido como \textit{Big Data} \cite{Siddiqa2016}.
+
+Esses dados são provenientes dos mais diversos tipos de dispositivos, sistemas e aplicações. Dispositivos móveis (como telefones celulares e tablets), computadores pessoais, sensores elétricos, roteadores de internet, aparelhos GPS, redes sociais e 
+\textit{websites} em geral são apenas alguns exemplos de fontes geradoras de conteúdo.  Além disso, cada um desses itens cria e transmite seus dados em diferentes velocidades e formatos.
+
+Entretanto, nem tudo que é criado e transmitido digitalmente pode ser considerado, de fato, relevante para determinados propósitos. Neste contexto, os dados, que podem ser caracteres, textos, números, imagens, sons, dentre outros, que sozinhos significam pouco ou quase nada para os seres humanos, precisam ser transformados em informação ou conhecimento, ou seja, conteúdo que possa ser compreendido e utilizado na sua totalidade. 
+
+Um processo que permite a extração de conhecimento de grandes volumes de dados é a classificação de dados. Esse procedimento da área de Aprendizado de Máquina consiste na utilização de um modelo, conhecido como classificador, para identificar em qual categoria (também conhecido como classe) um dado pertence. Desse modo, cada dado fará parte de uma determinada classe, permitindo que os dados sejam categorizados de acordo com suas próprias características.
+
+O processo de classificação é realizado em duas etapas: etapa de treinamento (ou aprendizado) e etapa de classificação. No treinamento, um algoritmo de classificação constrói o modelo classificador utilizando um conjunto de dados que contém classes previamente definidas e conhecidas. Como as classes das tuplas são providenciadas na etapa de treinamento, a classificação de dados é considerada uma ferramenta de Aprendizado Supervisionado. Por fim, a etapa de classificação é utilizada para classificar novas tuplas recebidas \cite{Han2006}. 
+
+A classificação supervisionada de dados persistentes, aqueles armazenados
+em conjuntos de dados estáticos, completos e previamente conhecidos é tema difundido na literatura. Entretanto, esse cenário tem se tornado cada vez mais obsoleto. A quantidade de sistemas que precisam processar, classificar e analisar dados transmitidos em tempo real, por sua criticidade, necessidade de atuação rápida ou simplesmente pela impossibilidade de armazenamento e consultas posteriores, devido ao grande volume e velocidades de 
+transmissão, é cada vez maior. Essa sequência de dados que chegam continuamente aos sistemas para o processamento é chamada de fluxo de dados. São exemplos de aplicações que lidam com fluxos de dados, a análise de tendências em redes sociais, gerenciamento de desastres naturais, gerenciamento de ataques em redes de computadores
+e filtragem de \textit{spam}, dentre outros \cite{Gradvohl2014}.
+
+A necessidade de análise em tempo real, aliada à característica inerente dos fluxos de dados de serem potencialmente infinitos, demanda soluções para que ocorra a redução da dimensão desses dados. Com uma dimensionalidade menor, os fluxos podem ser classificados de modo mais rápido, mais eficiente em termos de acurácia -- visto que com uma menor dimensão os modelos tendem a obter um melhor desempenho -- e menos custoso computacionalmente. Uma solução que permite essa redução é a utilização de algoritmos de Seleção de Atributos. Esses algoritmos visam a eliminação de atributos irrelevantes ou redundantes de um determinado conjunto de dados, reduzindo sua dimensionalidade \cite{Barddal2017}.   
+
+Entretanto, a aplicação de seleção de atributos em fluxos de dados não é trivial devido a natureza volátil desses dados. Os fluxos de dados estão sujeitos à um fenômeno conhecido como Mudança de Conceito. Segundo \citeonline{Gama2014}, esse fenômeno corresponde às mudanças na distribuição probabilística dos dados que podem acontecer ao longo do tempo. Essas mudanças podem acontecer de diferentes formas, como mudanças na características gerais ou na relação entre os atributos do conjunto. 
+
+Por exemplo, as estatísticas de consumo dos consumidores de um determinado setor da indústria podem sofrer diferentes alterações dependendo de fatores econômicos externos, que não estão ligados diretamente ao conjunto de dados, mas afetam-no diretamente, como mudanças de leis, inflação, especulações etc. Um outro exemplo se refere à mudanças súbitas dos interesses de compra de ações de uma determinada empresa no mercado financeiro, promovidas por uma especulação. 
+
+Esses fatores podem causar um impacto tão significativo no conjunto de dados que os algoritmos utilizados previamente se tornam obsoletos ou incapazes de lidar com o novo cenário. Sendo assim, um algoritmo de seleção de atributos para fluxos de dados deve ser capaz não só de reduzir a dimensão dos fluxos, mantendo a qualidade preditiva do classificador, como também de se adaptar às mudanças de conceito que possivelmente ocorram nos fluxos.
+
+Já existem alguns algoritmos de seleção de atributos para fluxos de dados na literatura. 
+\citeonline{Katakis2005} propõem um modelo para utilização de um algoritmo de seleção de atributos em conjunto com um classificador, de modo que ambos operem de modo incremental, avaliando os fluxos à medida que são recebidos. Já 
+\citeonline{Wang2014} apresentam um algoritmo guloso que realiza a seleção de atributos em cenários onde a dimensão total de atributos é desconhecida.
+
+Por sua vez, \citeonline{Carvalho2006} propõem um algoritmo baseado em erros que utiliza um classificador interno para avaliar, através de um sistema de pesos, qual o subconjunto ótimo de atributos. Já \citeonline{Yu2003} definem
+um algoritmo que se utiliza dos conceitos de entropia e incerteza simétrica do campo de teoria da informação para avaliar os atributos.
+
+\citeonline{Wu2013} propõe um algoritmo que utiliza critérios de relevância e redundância, classificando os atributos recebidos à partir de um critério interno de relevância, removendo todos aqueles que eventualmente se tornem redundantes. Por fim, \citeonline{Wang2015} apresentam um algoritmo que utiliza análise espectral de grupos, separando em grupos distintos atributos relevantes e não relevantes.
+
+Entretanto, como apontam \citeonline{Ramirez-Gallego2017}, esses algoritmos são adaptações de outros utilizados no aprendizado de conjuntos de dados persistentes. Sendo assim, esses algoritmos não foram construídos especificamente para lidar com fluxos de dados e, consequentemente, com o fenômeno de mudanças de conceito, podendo não apresentar resultados satisfatórios diante desses cenários, principalmente em mudanças recorrentes, ou seja, que acontecem de forma periódica (e.~g. vendas de um determinado produtivo no inverno e caem no verão).
+
+Contudo, nenhum desses algoritmos foi avaliado diante de cenários de mudanças de conceito. Deste modo, há a necessidade de avaliar o desempenho dos algoritmos apresentados quando aplicados na redução de dimensionalidade de fluxos de dados que apresentem variações probabilísticas. Este trabalho apresenta um levantamento e avaliação de desempenho de seis algoritmos de seleção de atributos para fluxos de dados presentes na literatura, em diferentes cenários, utilizando conjuntos de dados reais e artificiais contendo todos os tipos de mudanças de conceito. 
+
+O objetivo é verificar se tais algoritmos mantêm o bom desempenho mesmo quando a distribuição probabilística dos dados é alterada. A hipótese é que o desempenho dos algoritmos será inferior nesses cenários. Após essa avaliação, confirmando-se a hipótese, serão identificadas e oferecidas oportunidades de melhorias e soluções para otimização, contribuindo para a construção de um algoritmo capaz de reduzir a dimensão dos dados, porém mantendo a qualidade e bom desempenho, mesmo em situações onde haja evolução dos dados.
+
+
+\section{Objetivos}\label{sec:objetivos} 
+
+O objetivo deste trabalho é avaliar o desempenho dos algoritmos de seleção de atributos mais relevantes  em fluxos de dados, diante de diferentes cenários de mudança de conceito. Pretende-se, ao final dessa avaliação, oferecer contribuições e oportunidades de melhorias para o desenvolvimento de um algoritmo capaz de obter um bom desempenho independente de possíveis mudanças na distribuição de probabilidades
+dos dados ao longo de sua geração e processamento. Para atingir o objetivo principal deste trabalho, propõe-se os objetivos específicos a seguir:
+
+\begin{itemize}
+\item Caracterizar e selecionar bases de dados contendo diferentes tipos de mudança de conceito.
+\item Implementar os algoritmos de seleção de atributos selecionados em linguagem Java.
+\item Avaliar o desempenho dos algoritmos utilizando as bases de dados selecionadas previamente.
+\item Analisar e indicar oportunidades de melhorias, propondo soluções de correção ou
+otimização.
+\end{itemize}
+
+
+\section{Estrutura do Texto}\label{sec:estrutura_texto} 
+
+Esse texto está organizado em sete capítulos da seguinte forma:
+
+\begin{itemize}
+%[Andre] use os comandos \ref{label} para referenciar capítulos e seções no texto. Já fiz a substituição nos trechos a seguir.
+\item O Capítulo~\ref{chp:referencial} apresenta um referencial teórico dos principais conceitos referentes aos Fluxos de Dados, Sistemas de Processamento de Eventos Complexos, Mudanças de Conceito e sobre os algoritmos de Seleção de Atributos.
+\item O Capítulo~\ref{chp:levantamento} apresenta um levantamento bibliográfico contendo os principais trabalhos da literatura relacionados ao tema dessa dissertação de mestrado. 
+\item O Capítulo~\ref{chp:metodologia} apresenta a metodologia dos experimentos realizados neste trabalho, incluindo a caracterização dos algoritmos e bases de dados selecionadas, as métricas observadas e a configuração do ambiente.
+\item Os resultados parciais obtidos são apresentados no Capítulo~\ref{chp:resultados}.
+\item O Capítulo~\ref{chp:conclusoes} apresenta as conclusões obtidas até o presente momento.
+\item Por fim, o Capítulo~\ref{chp:cronograma} apresenta o cronograma deste trabalho, além de informações pertinentes às disciplinas cursadas ao longo do programa de mestrado.
+\end{itemize}
+
+% Com o avanço tecnológico e a difusão de tecnologias acessíveis para todas as camadas da sociedade, o volume de dados gerados diariamente impressiona. De acordo com \cite{Dobre2014}, 2.5 Exabyte de dados são gerados todos os dias. Isso implica que 90\% de todo conteúdo digital existente atualmente foi criado apenas nos últimos dois anos. 
+% Esse conjunto de dados em constante crescimento, transmitido em altas velocidades e que torna cada vez difícil seu armazenamento em bancos de dados tradicionais, é conhecido como \textit{Big Data} \cite{Siddiqa2016}. 
+
+% Esses dados são provenientes dos mais diversos tipos de dispositivos, sistemas e aplicações. Dispositivos móveis (como telefones celulares e tablets), computadores pessoais, sensores elétricos, roteadores de internet, aparelhos GPS, redes sociais e 
+% \textit{websites} em geral são apenas alguns exemplos de fontes geradoras de conteúdo.  Além disso, cada um desses itens cria e transmite seus dados em diferentes velocidades e formatos.
+
+% Entretanto, nem tudo que é criado e transmitido digitalmente pode ser considerado, de fato, relevante para determinados propósitos. Neste contexto, os dados, que podem ser caracteres, textos, números, imagens, sons, dentre outros, que sozinhos significam pouco ou quase nada para os seres humanos, precisam ser transformados em informação ou conhecimento, ou seja, conteúdo que possa ser compreendido e utilizado de forma plena.
+
+% Diante da necessidade de extrair informação dessa grande quantidade de dados existente, uma área de pesquisa surgiu como uma possível solução, recebendo cada vez mais atenção nos últimos anos. Esse campo, conhecido como Mineração de Dados, é definido como o processo de extração de conhecimento ou informação de grandes conjuntos de dados. Através de técnicas que atuam desde a preparação	dos dados para análise, através de atividades como limpeza e formatação do conjunto, até a efetiva análise e extração de informação, a mineração de dados busca oferecer soluções para que organizações usuários
+% possam usufruir desses dados de maneira significativa \cite{Han2006}.
+
+% Os processos que envolvem a mineração de dados, e consequentemente os procedimentos para extração de informação, também são conhecidos como um processo de Aprendizado 
+% \textit{Offline}
+% \cite{Jankowski2016}, pois assumem que todo o conjunto de dados já é conhecido
+% , está disponível. Assim, quaisquer técnicas que necessitem ser aplicadas utilizarão do conjunto em sua totalidade. Além disso, tais técnicas podem ser reaplicadas no mesmo conjunto sempre que for preciso até que o resultado esperado seja atingido. 
+
+% Entretanto, esse cenário tem se tornado cada vez mais obsoleto. A quantidade
+% de sistemas que precisam processar e analisar dados transmitidos em tempo real, por sua criticidade, necessidade de atuação rápida ou simplesmente pela impossibilidade de armazenamento e consultas posteriores, devido ao grande volume e velocidades de 
+% transmissão, é cada vez maior. 
+% Essa sequência de dados que chegam continuamente aos sistemas para o processamento é chamada de fluxo de dados.São exemplos de aplicações que lidam com fluxos de dados, 
+% a análise de tendências em redes sociais, gerenciamento de desastres naturais, gerenciamento de ataques em redes de computadores
+% e filtragem de \textit{spam}, dentre outros \cite{Gradvohl2014}.
+
+% \todoMatheus{Rever esse parágrafo}Diferente do processo de aprendizado \textit{offline}, o processamento dos 
+% fluxos de dados representam um novo cenário dentro da área de mineração de dados: a extração de conhecimento em dados transmitidos em tempo real ou Aprendizado 
+% \textit{Online}. Segundo \cite{Ramirez-Gallego2017}, as principais características dos fluxos de dados, que os diferem dos dados utilizados no aprendizado \textit{offline}
+% (também conhecidos como Dados Persistentes) são: o conjunto total dos fluxos não é conhecido previamente, pois são transmitidos sequencialmente, um por vez ou em partes delimitadas; as instâncias podem ser transmitidas em tempos completamente diferentes; os fluxos são potencialmente infinitos; cada instância pode ser acessada apenas um número limitado de vezes; as instâncias precisam ser analisadas em um tempo limitado para oferecer uma resposta em tempo real e evitar congestionamento das filas para processamento; e, por fim, as características probabilísticas das instâncias podem mudar ao longo do tempo. Este último fenômeno é conhecido como Mudança de Conceito. 
+
+% A mudança de conceito é a característica mais desafiadora dos fluxos de dados. Segundo \citeonline{Gama2014}, esse fenômeno corresponde às mudanças na distribuição probabilística dos dados que podem acontecer ao longo do tempo. Essas mudanças podem acontecer de diferentes formas, como mudanças na características gerais dos dados ou na relação entre os atributos do conjunto. Por exemplo, as estatísticas de consumo dos consumidores de um determinado setor da indústria podem sofrer diferentes alterações dependendo de fatores econômicos externos, que não estão ligados diretamente ao conjunto de dados, mas afetam-no diretamente, como mudanças de leis, inflação, especulações etc. Esses fatores podem causar um impacto tão significativo no conjunto de dados que os algoritmos utilizados previamente se tornam obsoletos ou incapazes de lidar com o novo cenário.
+
+% Com o objetivo de lidar com todos esses desafios, algumas técnicas podem ser aplicadas para reduzir tanto o tempo, quanto o custo computacional, necessários para extração de conhecimento dos fluxos de dados. Uma dessas técnicas, conhecida como Seleção de Atributos, visa a eliminação de atributos irrelevantes ou redundantes de um determinado conjunto de dados \cite{Barddal2017}. Através dessa eliminação, o processo de extração de conhecimento tende a ser mais rápido, eficiente em termos de acurácia, visto que com um menor quantidade de atributos os modelos tendem a obter um melhor desempenho e menos custoso. 
+
+% No campo de fluxos de dados, já existem alguns algoritmos de seleção de atributos que trabalham de forma \textit{online}. Entretanto, como aponta \cite{Ramirez-Gallego2017}, a maioria deles são adaptações de algoritmos utilizados no aprendizado 
+% \textit{offline}. Sendo assim, esses algoritmos \textit{offline} não foram construídos especificamente para lidar com fluxos de dados e o fenômeno de mudanças de conceito, podendo não apresentar resultados satisfatórios diante desses cenários, principalmente em mudanças recorrentes, ou seja, que acontecem de forma periódica (e.g. vendas de um determinado produtivo no inverno e caem no verão).
+
+% Deste modo,primeiramente, os principais algoritmos de seleção de atributos para fluxos de dados devem ser testados e avaliados diante de diferentes cenários de mudança de conceito a fim de verificar sua eficácia. A construção de um único algoritmo que funcione perfeitamente em todos os cenários é improvável. Entretanto, à partir dessa análise, é possível observar pontos chave e oportunidades para melhorias, visando a construção de um algoritmo que funcione adequadamente tanto em fluxos que não possuam mudanças em sua distribuição, quanto aqueles que apresentem um ou mais tipos de mudança de conceito, mantendo a sua eficácia. 
+
+% \section{Objetivos}\label{sec:objetivos} 
+
+% O objetivo deste trabalho é avaliar o desempenho dos algoritmos de seleção de atributos mais relevantes  em fluxos de dados, diante de diferentes cenários de mudança de conceito. Pretende-se, ao final dessa avaliação, oferecer contribuições e oportunidades de melhorias para o desenvolvimento de um algoritmo capaz de obter um bom desempenho independente de possíveis mudanças na distribuição de probabilidades
+% dos dados ao longo de sua geração e processamento. Para atingir o objetivo principal deste trabalho, propõe-se os objetivos específicos a seguir:
+
+% \begin{itemize}
+% \item Caracterizar e selecionar bases de dados contendo diferentes tipos de mudança de conceito;
+% \item Implementar os algoritmos de seleção de atributos selecionados em linguagem Java;
+% \item Avaliar o desempenho dos algoritmos utilizando as bases de dados selecionadas previamente.
+% \item Analisar e indicar oportunidades de melhorias, propondo soluções de correção e/ou otimização.
+% \end{itemize}
+
+
+% \section{Estrutura do Texto}\label{sec:estrutura_texto} 
+
+% Esse texto está organizado em sete capítulos da seguinte forma:
+
+% \begin{itemize}
+% %[Andre] use os comandos \ref{label} para referenciar capítulos e seções no texto. Já fiz a substituição nos trechos a seguir.
+% \item O Capítulo~\ref{chp:referencial} apresenta um referencial teórico dos principais conceitos referentes aos Fluxos de Dados, Sistemas de Processamento de Eventos Complexos, Mudanças de Conceito e sobre os algoritmos de Seleção de Atributos.
+% \item O Capítulo~\ref{chp:levantamento} apresenta um levantamento bibliográfico contendo os principais trabalhos da literatura relacionados ao tema dessa dissertação de mestrado. 
+% \item O Capítulo~\ref{chp:metodologia} apresenta a metodologia dos experimentos realizados neste trabalho, incluindo a caracterização dos algoritmos e bases de dados selecionadas, as métricas observadas e a configuração do ambiente.
+% \item Os resultados parciais obtidos são apresentados no Capítulo~\ref{chp:resultados}.
+% \item O Capítulo~\ref{chp:conclusoes} apresenta as conclusões obtidas até o presente momento.
+% \item Por fim, o Capítulo~\ref{chp:cronograma} apresenta o cronograma deste trabalho, além de informações pertinentes às disciplinas cursadas ao longo do programa de mestrado.
+% \end{itemize}

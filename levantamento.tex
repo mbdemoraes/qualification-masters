@@ -1,0 +1,416 @@
+\chapter{Levantamento Bibliográfico}\label{chp:levantamento}
+
+Esse capítulo apresenta os principais algoritmos de seleção de atributos que operam de modo \textit{online} para fluxos de dados encontrados na literatura. Serão apresentadas suas características e comportamentos, vantagens e desvantagens e tipos. Os algoritmos aqui descritos serão os utilizados nos experimentos para avaliação de desempenho.
+
+\section{Seleção de Atributos em Fluxos de Dados}\label{sec: lev_algoritmos}
+
+Embora o aprendizado \textit{online} receba atenção considerável, o mesmo não pode se dizer dos algoritmos de seleção de atributos que operem de forma contínua e em tempo real, segundo \citeonline{Bolon-Canedo2015}. Entretanto, alguns algoritmos e propostas para esse tipo de técnica de redução de dados já existem na literatura. Esses algoritmos, considerados os mais relevantes existentes por \citeonline{Ramirez-Gallego2017}, por sua capacidade de execução \textit{online}, sua independência em relação aos classificadores e seus bons resultados quando aplicados em fluxos de dados, são descritos na Tabela~\ref{tab:algoritmos}. 
+
+\begin{table}[!h]
+\centering
+\caption{Algoritmos de seleção de atributos para fluxos de dados}
+\label{tab:algoritmos}
+\begin{tabular}{lll}
+\hline
+Método &  Tipo de seleção & Tipo de algoritmo \\ \hline
+Método de Katakis & Filtro & Incremental \\
+FCBF &  Filtro & Baseado em correlação\\
+OFS &  Envelopador &  Guloso\\ 
+OFGS &  Filtro &  Clusterização espectral\\ 
+OSFS &  Filtro &  Relevância e Redundância\\ 
+EFS & Envelopador & \textit{Mistake-driven} \\ \hline
+\end{tabular}
+\end{table}
+
+
+Esses algoritmos apresentam bons resultados quando utilizados em fluxos de dados com alta dimensionalidade, incluindo problemas de classificação de imagens, como no caso do 
+\textit{Online Feature Selection with Group Selection} (OFGS)
+\cite{Wang2015}. Entretanto, nenhum deles foi testado em cenários de mudança de conceito. Nas próximas 
+seções
+, são apresentados os detalhes de cada algoritmo, contendo uma descrição geral, a definição do problema, a solução proposta, bem como seu pseudocódigo.
+
+
+
+\section{Método de Katakis}\label{sec:katakis} 
+
+O Método de Katakis (MK), 
+\nomenclature{MK}{\textit{Método de Katakis}} 
+proposto por \citeonline{Katakis2005} é uma das abordagens mais antigas e difundidas no que diz respeito à seleção de atributos em fluxos de dados, utilizada inicialmente para classificação de fluxos de dados textuais. Esses fluxos são caracterizados por possuírem uma alta dimensionalidade, pois cada palavra contida em um texto (fluxo), é entendida como um atributo do mesmo. O MK propõe, basicamente, a utilização de dois componentes em conjunto: a) um método de avaliação de atributos incremental; e b) um algoritmo de aprendizado incremental que possa considerar um subconjunto de atributos durante o processo de classificação.
+
+Um método de avaliação de atributos é aquele que avalia o poder preditivo de todos os atributos envolvidos em um fluxo de dados e seleciona os $N$ melhores. Esses métodos avaliam cada um dos atributos baseados em uma estatística acumulativa considerando o número de vezes que aparecem em cada uma das diferentes classes dos fluxos. Isso implica que esses métodos são, essencialmente, incrementais. 
+
+%[Andre] Adicionei uma quebra de parágrafo
+Quando um novo fluxo de dados é recebido, as estatísticas são atualizadas e a avaliação pode ser imediatamente calculada sem a necessidade do reprocessamento de dados antigos. Esses métodos também podem lidar com novos atributos à medida que são recebidos. Sendo assim, a primeira etapa do MK pode ser realizada usando uma variedade de algoritmos, como o ganho de informação, $\chi^{2}$ e informação mútua.
+
+A partir da habilidade de receber novos atributos, avaliá-los e alterar o conjunto de $N$ atributos de forma incremental, esse processo deve estar alinhado com a utilização de um algoritmo que também funcione de modo incremental, possibilitando que, na ocorrência de novos atributos ou na mudança da relação deles com as classes, um novo conjunto de $N$ atributos seja escolhido. Os autores propõem a utilização de algoritmos como Naïve
+Bayes (NB) 
+\nomenclature{NB}{Naïve Bayes} 
+e o k-Vizinhos mais Próximos (k-\textit{Nearest Neighbors} -- kNN), 
+\nomenclature{kNN}{k-\textit{Nearest Neighbors}} 
+pois em ambos os algoritmos cada atributo realiza uma contribuição independente para a definição da classe do fluxo.
+
+O MK, portanto, é qualquer utilização de um algoritmo de seleção de atributos incremental que opere em conjunto com um algoritmo de classificação também incremental. Neste trabalho, é utilizado o Ganho de Informação \cite{Quinlan1986} em conjunto com o algoritmo de classificação 
+Naïve Bayes.
+
+\section{\textit{Online Feature Selection}}\label{sec:mrec} 
+
+\textit{Online Feature Selection} 
+(OFS),
+\nomenclature{OFS}{\textit{Online Feature Selection}} 
+proposto por \citeonline{Wang2014}, é um algoritmo de filtro guloso para seleção de atributos em fluxos de dados online. Esse algoritmo pode ser utilizado tanto para aprendizado \textit{online} em conjuntos de dados que contenham previamente todas as informações presentes (atributos, tuplas e classes), quanto em cenários onde os conjuntos não são completamente conhecidos.
+
+O problema é definido do seguinte modo: Seja $ \{( x_t,y_t ) \, | \, t = 1,\dots,T \} $ uma sequência de tuplas recebidas por fluxos de dados, onde cada $x_t \in \ \mathbb{R}^{d}$ é um vetor de dimensão $d$ e $y_t \in \{-1,+1\}$ é a classe de cada tupla. Assume-se que $d$ é um valor alto e, portanto, para eficiência computacional, é necessário que seja selecionado um número reduzido de atributos para classificação linear. Ou seja, para cada tentativa $t$, um algoritmo de classificação $w_t \in \mathbb{R}^{d}$ será usado para classificar a tupla $x_t$. O algoritmo utiliza uma função linear sgn($w_t^{T} x_t$), que retornará 1 caso a predição esteja correta e 0 caso esteja incorreta.
+
+Ao invés de utilizar todos os atributos para a classificação, o classificador $w+t$ usará, no máximo, $B$ atributos não zeros, i.e., $||w_t||_0 \leq B$, onde $B \geq 0$ é uma constante pré definida. Consequentemente,no máximo $B$ atributos de $x_t$ serão usados para a classificação.
+
+A proposta dos autores consiste na utilização de um algoritmo guloso para seleção de atributos em cenários onde não existe o conhecimento prévio de todas as informações dos atributos dos fluxos de dados, utilizando uma técnica clássica conhecida como \textit{exploration-exploitation trade off} \cite{March1991}. \textit{Exploration} se refere  à execução de uma ação que não é recomendada pelo atual classificador. Ela permite que o classificador explore o ambiente, receba um \textit{feedback} de diferentes ações, e consequentemente ganhe novo conhecimento sobre o ambiente. \textit{Exploitation}, em contrapartida, se refere à executar a melhor ação de acordo com o modelo atual em busca de maximizar os ganhos \cite{Valizadegan2011}. 
+
+Entende-se que apenas uma parte dos atributos e das instâncias é conhecida. Neste abordagem, o algoritmo gastará $\epsilon$ tentativas para $exploration$, escolhendo aleatoriamente $B$ atributos do total de $d$ atributos, e $ 1 - \epsilon $ tentativas em $exploitation$ escolhendo $B$ atributos na qual o classificador $w_t$ possui valores não zerados. O Algoritmo~\ref{alg:ofs} apresenta o pseudocódigo para OFS.
+%[Andre] Eliminei o \\ da linha anterior
+
+\begin{algorithm}[!htb]
+   \SetAlgoLined
+   \Entrada{
+    \\ $R$ : máxima norma L2\\
+    $\eta$ : tamanho do passo \\
+    B: o numero de atributos selecionados \\
+    $\epsilon$: a técnica de \textit{exploration-exploitation trade off}}
+   \Inicio{
+    $w_1 = 0$ \\
+    
+     \Para{ $t = 1,2,\dots, T$} {
+        Seleciona amostra $Z_t$ de uma distribuição Bernoulli com probabilidade $\epsilon$
+        
+        \Se{$Z_t = 1$} {
+           Seleciona aleatoriamente $B$ atributos $C_t$ de [d] \\
+        } 
+        \Senao {
+          Seleciona os atributos que possuem valor diferente de zero em $w_t$, i.e., $C_t = \{i:[W_t]_i \neq 0 \}$ \\
+         }  
+        
+     	Recebe $\tilde{x_t}$ apenas requisitando os atributos em $C_t$ \\
+        Faz a predição sgn($w_t^{T} \tilde{x_t}$)\\
+        Recebe $y_t$ \\
+        
+        \Se{$y_tw_t^{T} \tilde{x_t} \leq 1$} {
+           Computar $\hat{x_t}$ como \\
+           $ [\hat{x_t}]_i  = \frac{[\tilde{x_t}_i]}{\frac{B}{d} \epsilon + I([w_t]_i \neq 0) (1-\epsilon)}, i= 1, \dots, d $ \\
+           
+           $\widetilde{w}_{t+1} = w_t + y_t \eta \hat{x_t} $ \\
+           $\hat{w}_{t+1} = min \Big\{1, \frac{R}{\left|\left| \widetilde{w}_{t+1} \right|\right|}_2 \Big\} \widetilde{w}_{t+1} $ \\
+           ${w}_{t+1} = \textsc{Truncar}(\hat{w}_{t+1}, B) $ \\
+        }
+         \Senao {
+           ${w}_{t+1} = w_t $ \\
+         }       
+
+    }
+    
+    }
+   \caption{\textsc{Online Feature Selection (OFS)}}\label{alg:ofs}
+ \end{algorithm} 
+ 
+%\bigskip
+
+Esse algoritmo inicia sua execução inicializando o classificador $w_t$ como zero. A próxima etapa, para todas as tuplas presentes nos fluxos, é extrair uma amostra $Z_t$ de uma distribuição Bernoulli com probabilidade $\epsilon$. Caso a amostra $Z_t = 1$, o algoritmo seleciona aleatoriamente $B$ atributos do total de atributos $[d]$, armazenando esses atributos na variável $C_t$. Se a amostra $Z_t \neq 1$, os atributos armazenados na variável $C_t$ serão aqueles que não possuem valor zero no classificador $w_t$.
+
+Depois, o algoritmo recebe uma tupla $\tilde{x_t}$ apenas requisitando os atributos presentes em $C_t$. Então, é realizada uma predição da possível classe da tupla em sgn($w_t^{T} \tilde{x_t}$). O algoritmo recebe a verdadeira classe $y_t$. Se a predição estiver incorreta ($y_tw_t^{T} \tilde{x_t} \leq 1$), o classificador precisará ser alterado.  Nesse caso, é computada uma nova variável $\hat{x_t}$, onde cada atributo $[\hat{x_t}]_i$ receberá como valor a divisão entre o atributo de mesmo posição em $\tilde{x_t}_i$ e a operação $\frac{B}{d} \epsilon + I([w_t]_i \neq 0) (1-\epsilon)$ para todo atributo $i$ no conjunto de atributos $d$. 
+
+%[Andre] Adicionei uma quebra de parágrafo
+Posteriormente, é criado um preditor $\widetilde{w}_{t+1}$ adicionando o produto escalar entre a classe, o tamanho de passos $\eta$ e o vetor $\hat{x_t}$ aos resultados já existentes em $w_t$. Depois, um novo preditor $\hat{w}_{t+1}$ é construído para armazenar o resultado da multiplicação escalar entre  $\widetilde{w}_{t+1}$ e o valor mínimo entre 1 e a divisão entre a norma L2 $R$ e a norma $\left|\left| \widetilde{w}_{t+1} \right|\right|_2$. Por fim, o preditor ${w}_{t+1}$ é truncado, recebendo todos os $B$ atributos selecionados de $\hat{w}_{t+1}$. Caso a predição esteja correta, o classificador permanecerá com os mesmos valores. 
+
+\section{\textit{Extremal Feature Selection}}\label{sec:efs} 
+
+\citeonline{Carvalho2006} propõem \textit{Extremal Feature Selection} (EFS),
+\nomenclature{EFS}{\textit{Extremal Feature Selection}} 
+um método de seleção de atributos online que utiliza os pesos computados por um classificador interno (\textit{Modified Balanced Winnow}, MBW) 
+\nomenclature{MBW}{\textit{Modified Balanced Winnow}} 
+para medir a relevância dos atributos. O MBW é considerado um algoritmo de aprendizado online \textit{mistake-driven}. 
+
+O problema é definido do seguinte modo: o algoritmo MBW supõe que cada tupla $x_t$ é um vetor de pesos positivos, i.e., $x_{i}^{j} \geq 0, \forall t \text{ e } \forall j $. Para cada nova tupla $x_t$, o modelo realizará uma predição $\hat{y_t} \in \{-1,1\}$ e comparará o resultado com a verdadeira classe $y_t \in \{-1,1\}$. A predição será baseada na função de \textit{score} $f$, utilizando a instância $x_t$ e o vetor de pesos $w_i$. Caso a predição esteja incorreta, o modelo será atualizado. O \textit{score} é atribuído à partir da diferença absoluta entre os pesos positivos e negativos de cada atributo. 
+
+O MBW é composto de alguns parâmetros, sendo eles um parâmetro de promoção $\alpha > 1$, um parâmetro de rebaixamento $\beta$, onde $0 < \beta < 1$ e um valor limiar (ou mínimo) ${\theta}_{th} > 0$. Dentro desse cenário, seja $\langle x_t, w_i \rangle$ o produto interno dos vetores $x_t$ e $w_i$. Neste caso, o modelo $w_t$ é a combinação de duas partes: um modelo positivo $u_t$ e um modelo negativo $v_t$. A função de \textit{score} é dada por $f = \langle x_t, u_i \rangle - \langle x_t, v_i \rangle - {\theta}_{th}$.
+
+Em relação à suas variações, o \textit{Positive Winnow} e o \textit{Balanced Winnow}, o MBW possui duas grandes modificações. A primeira é que a predição é considerada incorreta não só quando a classe original $y_t$ é diferente da classe prevista $\hat{y_t}$, mas também quando a função de  \textit{score} multiplicada por $y_t$ é menor que uma margem pré-definida $M$, onde $M > 0$. Sendo assim, a condição de erro é dada por $(y_t \cdot (\langle x_t,u_i \rangle - \langle x_t, v_i \rangle - {\theta}_{th})) \leq M$.
+
+Os autores afirmam que o algoritmo possui um melhor desempenho quando seus dados são aumentados e normalizados, como uma etapa de pré-processamento, antes da realização da classificação. Durante o aprendizado, o algoritmo recebe um novo exemplo $x_t$ com $m$ atributos, e inicialmente aumenta o exemplo com um atributo adicional $(m+1)^{th}$, cujo valor é permanentemente definido como 1. Esse atributo é geralmente conhecido como o atributo ``bias''. Depois da etapa de aumento, o algoritmo normaliza a soma dos pesos da instância $x_t$ para 1, restringindo assim todos os pesos dos atributos para $0 \leq x_{i}^{j} \leq 1 $. O Algoritmo~\ref{alg:efs} apresenta o pseudocódigo para a implementação do MBW.
+
+%\bigskip
+
+\begin{algorithm}[!htb]
+   \SetAlgoLined
+  
+   \Inicio{
+    $i = 0$ \\
+     contador $c_i = 0$ \\
+     $u_0 = 0$ \\
+     $v_0 = 0$ \\
+    
+     \Para{ $t = 1,2,\dots, T$} {
+       Recebe uma nova tupla $x_t$, adiciona o atributo ``bias'' \\
+       Normaliza $x_t$ para 1 \\
+       Calcula o $score = \langle x_t, u_i \rangle - \langle x_t, u_i \rangle - {\theta}_th$ \\
+       Recebe a classe verdadeira $y_t$ \\
+       
+       \Se{predição estava incorreta, i.e., $(score \cdot y_t) \leq M$} {
+          i. Atualiza os modelos. Para todos os atributos $j$ s.t. $x_t > 0$: \\
+        \[ u_{i+1}^{j}=\begin{cases}
+               u_{i}^{j} \cdot \alpha \cdot (1+ x_{j}^{t}), \text{se } y_t > 0\\
+               u_{i}^{j} \cdot \beta \cdot (1 - x_{j}^{t}), \text{se } y_t < 0\\
+              
+            \end{cases} \]
+            
+            \[ v_{i+1}^{j}=\begin{cases}
+               v_{i}^{j} \cdot \beta \cdot (1 - x_{j}^{t}), \text{se } y_t > 0\\
+               v_{i}^{j} \cdot \alpha \cdot (1 + x_{j}^{t}), \text{se } y_t < 0\\
+              
+            \end{cases} \]
+          
+           ii. $i = i + 1$
+        }
+        
+        \Senao {
+           $c_i = c_i + 1$ \\
+         }  
+      
+      
+    }
+    
+    }
+   \caption{\textsc{Modified Balanced Winnow (MBW)}}\label{alg:efs}
+ \end{algorithm}
+
+\bigskip
+
+
+
+\section{\textit{Fast Correlation-Based Filter Solution}}\label{sec:fcbf} 
+
+O algoritmo \textit{Fast Correlation-Based Filter Solution} (FCBF), 
+\nomenclature{FCBF}{\textit{Fast Correlation-Based Filter}} 
+proposto por \citeonline{Yu2003}, é uma solução que se baseia em um conceito de teoria de informação conhecido como entropia, uma medida de incerteza de determinada variável aleatória. A entropia de uma variável X é dada  
+de acordo com a Equação~\ref{eq:entropiaX} a seguir.
+
+\begin{equation}
+H(X) = - \sum_{i} P(x_i) log_2 (P(x_i))
+\label{eq:entropiaX}
+\end{equation}
+
+E a entropia de X após uma observação de outra variável Y é definido de acordo com a Equação~\ref{eq:entropiaXdadoY} a seguir.
+
+\begin{equation}
+H(X|Y) = - \sum_{j} P(y_i) \sum_{i} (P(x_i|y_j) log_2 (P(x_i|yj))
+\label{eq:entropiaXdadoY}
+\end{equation}
+% Mantenha esse % no início dessa linha para o LaTeX não indentar a próxima linha
+nas quais P($x_i$) é a probabilidade anterior para todos os valores de $X$, e P($x_i|y_i$) é a probabilidade posterior de $X$ dado os valores de $Y$. O montante pelo qual o valor da entropia de $X$ diminui reflete informações adicionais sobre $X$ fornecidas por $Y$, o que é conhecido como Ganho de Informação (\textit{Information Gain} -- IG) \cite{Quinlan1986}, 
+dado pela Equação~\ref{eq:infoGain} a seguir.
+
+
+\begin{equation}
+IG(X|Y) = H(X) - H(X|Y)
+\label{eq:infoGain}
+\end{equation}
+
+Entretanto, os autores apontam que o ganho de informação é simétrico para duas variáveis $X$ e $Y$ e tendencioso em favor dos atributos que contenham maiores valores. Nesse caso, os valores precisam ser normalizados para garantir que a comparação seja imparcial. Nesse sentido, \citeonline{Yu2003} utilizam a Incerteza Simétrica (\textit{Simmetrical Uncertainty} (SU) ) 
+\nomenclature{SU}{\textit{Simmetrical Uncertainty}} 
+para calcular a correlação entre duas variáveis aleatórias (no caso, um atributo e sua relação com a classe). A SU é definida formalmente conforme a Equação~\ref{eq:simUncert}.
+
+\begin{equation}
+SU (X,Y) = 2 \Big[\frac{IG(X|Y)}{H(X) + H(Y)}\Big]
+\label{eq:simUncert}
+\end{equation}
+
+Neste sentido, os autores propõem que a partir da utilização de $SU$ como uma medida de qualidade, é possível a construção de um algoritmo de seleção de atributos que vise selecionar os atributos que contenham uma correlação relevante e não redundante com a classe. Para que isso seja possível, os autores propõem o uso de três heurísticas para identificar atributos relevantes e remover atributos redundantes. 
+
+Seja $SU_{i,c}$ o valor de $SU$ que mede a correlação entre um atributo $F_i$ e a classe $C$. Essas heurísticas implicam que, se $F_j$ for igual à $F_i$, o mesmo é chamado de um atributo redundante para $F_i$ e é armazenado em uma lista $S_{pi}$, contendo todos os pares redundantes de $F_i$. Dado $F_i \in S^{'}$ e $S_{pi} \neq \emptyset$, a lista $S_{pi}$ é divida em duas partes, $S_{pi}^{+}$ e $S_{pi}^{-}$, onde $S_{pi}^{+} = \{ F_j | F_j \in S_{pi}, SU_{j,c} > SU_{i,c} \}$ e $S_{pi}^{-} = \{ F_j | F_j \in S_{pi}, SU_{j,c} \leq SU_{i,c} \}$. As heurísticas são descritas em detalhes à seguir:
+
+\theoremstyle{definition}
+\begin{definition}{\textbf{Heurística 1}}\label{def:fcbf_heuristica}
+(Se $S_{pi}^{+} = \emptyset$). Trate $F_i$ como um atributo relevante, remova todos os atributos em $S_{pi}^{-}$, e pule a identificação de pares redundantes para esse atributo.
+
+\textbf{Heurística 2} (Se  $S_{pi}^{+} \neq \emptyset$). Processa todos os atributos em $S_{pi}^{+}$ antes de tomar uma decisão em $F_i$. Se nenhum deles se tornar relevante, siga com a Heurística 1; caso contrário remova apenas $F_i$ e decida se remove ou não os atributos em $S_{pi}^{-}$ baseado em outros atributos em $S^{'}$.
+
+\textbf{Heurística 3} (ponto de partida). O atributo com o maior valor para $SU_{i,c}$ é sempre um atributo relevante e pode ser usado como um ponto de partida para remoção de outros atributos.
+\end{definition}
+
+%[Andre] Movi o parágrafo a seguir para antes do algoritmo
+O Algoritmo~\ref{alg:fcbf} apresenta o código para FCBF. Dado um conjunto de dados $S$, contendo $N$ atributos e uma classe $C$, o algoritmo encontra o melhor conjunto de atributos predominantes $S_{melhor}$ para a determinada classe. O algoritmo consiste de duas etapas. Na primeira (linhas 2-8), o algoritmo calcula o $SU$ para cada atributo, seleciona os atributos relevantes na lista $S_{lista}^{'}$ baseado no parâmetro de limiar $\delta$, e os ordena em ordem decrescente de acordo com seus valores $SU$.
+
+%\bigskip 
+
+\begin{algorithm}[!htb]
+   \SetAlgoLined
+   \Entrada{
+    \\ $S (F_1,F_2,\dots,F_N, C)$ : um conjunto de treinamento\\
+    $\delta$ : parâmetro pré-definido }
+     \Saida{
+     \\ $S_{melhor}$: o subconjunto ótimo de atributos}
+   \Inicio{
+   	  \Para{ $ i =1 \text{ até } N$} {
+       Calcula $SU_{i,c}$ para $F_i$ \\
+       
+       \Se{$SU_{i,c} \geq \delta$} {
+         Acrescenta $F_i$ em $S_{lista}^{'}$ \\
+       }
+      
+      }
+      
+      Ordena $S_{lista}^{'}$ de forma descrescente \\
+      $F_p = primeiroElemento(S_{lista}^{'})$
+      
+      \Enqto{$F_p \neq NULL$} {
+        $F_q = proximoElemento(S_{lista}^{'}, F_p)$ \\
+        \Se{$F_q \neq NULL$} {      
+        	 \Enqto{$F_q \neq NULL$} {
+               $F_{q}^{'} = F_q$ \\
+             	 \Se{$SU_{p,q} \geq SU_{q,c}$} {     
+                    remove $F_q$ de $S_{lista}^{'}$ \\
+                    $F_q = proximoElemento(S_{lista}^{'}, F_{q}^{'})$ 
+                 }
+                  \Senao {
+                     $F_q = proximoElemento(S_{lista}^{'}, F_{q})$ \\
+                   } 
+                  
+             }
+        
+        }
+         $F_p = proximoElemento(S_{lista}^{'}, F_p)$
+      }
+      $S_{melhor} = S_{lista}^{'}$ 
+   
+  }
+
+   \caption{\textsc{Fast Correlation-Based Filter (FCBF)}}\label{alg:fcbf}
+ \end{algorithm}
+
+%\bigskip 
+Já na segunda etapa (linhas 9-25), a lista $S_{lista}^{'}$ é processada para remoção de atributos redundantes. De acordo com a Heurística 1, um atributo $F_p$ que já foi determinado como relevante pode sempre ser utilizado para filtrar outros atributos que foram avaliados com menor valor que $F_p$ e possuem $F_p$ como um par redundante. A iteração inicia do primeiro elemento (Heurística 3) no atributo $S_{lista}^{'}$ (linha 9) e continua como se segue. Para todos os atributos restantes (para o primeiro à direita de $F_p$ até o último na lista $S_{lista}^{'}$), se $F_p$ for um par redundante para outro atributo $F_q$, então $F_q$ será removido de $S_{lista}^{'}$ (Heurística~2).
+
+%[Andre] Adicionei uma quebra de parágrafo
+Após uma rodada de atributos filtrados baseados em $F_p$, o algoritmo tomará o próximo atributo restante à direita de $F_p$ como nova referência (linha 24) para repetir o processo de filtragem. O algoritmo encerra sua execução até não existirem atributos para serem removidos de $S_{lista}^{'}$.
+
+\section{\textit{Online Streaming Feature Selection}}\label{sec:osfs} 
+
+O algoritmo \textit{Online Streaming Feature Selection} (OSFS),
+\nomenclature{OSFS}{\textit{Online Streaming Feature Selection}} 
+proposto por \citeonline{Wu2013}, tem como objetivo principal a seleção de atributos de modo \textit{online} e consiste de duas etapas: 1) utilização de um conceito de relevância de atributos para selecioná-los a medida que são transmitidos e recebidos; e 2) remoção de atributos redundantes dos atributos selecionados até o momento, baseados no conceito de redundância de atributos. 
+
+O Algoritmo~\ref{alg:osfs} apresenta o pseudocódigo para OSFS. Para esse algoritmo, $Ind(C,X|S)$ representa um teste de condição independente entre um atributo $X$ e uma classe $C$ de um fluxo $S$, e $Dep(C,X|S)$ representa um teste de condição dependente entre as mesmas variáveis. Esses testes condicionais são realizados utilizando o teste $G^{2}$, uma variação do método $\chi^{2}$. Por fim, $BCF$ representa o melhor subconjunto de atributos até o momento.
+
+%\bigskip
+
+\begin{algorithm}[!htb]
+   \SetAlgoLined
+  
+   \Inicio{
+    $BCF = \{ \}$ 
+  
+  \Enqto{condição de parada não for atingida} {
+    $added = 0$ \\
+     	/* Recebe um novo fluxo */ \\
+    	$X \leftarrow \text{recebe\_novo\_atributo()} $ \\
+     	/* Realiza a análise de relevância \textit{online} */ \\
+      \Se{$Dep(C,X|\emptyset)$} {     
+                $added =1$ \\
+                /* Adiciona X em BCF */ \\
+                $BCF = BCF \cup X$ \\
+       }
+    /* Realiza a análise de redundância \textit{online} */ \\
+      \Se{$added$} 
+      {     
+                 \Para{ $ \text{cada atributo } Y \in BCF$} {
+						\Se{$ \exists S \subseteq BCF-Y \text{ s.t. } Ind(C,Y|S)$} 
+      					{ 
+                        	/* Remove Y de BCF */ \\
+                            BCF = BCF - Y;
+                        }
+                  }
+
+
+     }
+   }
+   Retorna BCF
+   }
+   
+   \caption{\textsc{Online Streaming Feature Selection (OSFS)}}\label{alg:osfs}
+ \end{algorithm}
+
+\bigskip
+
+O algoritmo OSFS propõe a implementação de um método de descobrimento ótimo de atributos, baseado em duas fases: análise de relevância \textit{online} (passos 6-11) e análise de redundância \textit{online} (passos 12-20). Na primeira, OSFS descobre atributos fortemente e fracamente relevantes, adicionando-os à $BCF$. Quando um novo atributo é recebido, OSFS avalia sua relevância para a classe $C$ e decide se descarta o novo atributo ou o adiciona à $BCF$, de acordo com sua relevância.
+
+Quando um novo atributo é adicionado à $BCF$, a análise de redundância é disparada. Nesse ponto, OSFS identifica dinamicamente e elimina atributos redundantes em $BCF$. Se existe um subconjunto de atributos dentro $BCF$ que implica que qualquer atributo presente em $BCF$ e a classe $C$ são condicionalmente independentes, então o atributo previamente selecionado $Y$, $Y \in BCF$, se torna redundante e, portanto, é removido de $BCF$. O algoritmo OSFS alterna as duas fases até que um dos seguintes critérios de parada seja atingido: 1) Uma acurácia previamente definida é atingida; ou 2) o número máximo de iterações é atingido; ou ainda 3) não existem mais atributos disponíveis.
+
+\section{\textit{Online Group Feature Selection}}\label{sec:ogfs} 
+
+O algoritmo \textit{Online Group Feature Selection} (OGFS) 
+\nomenclature{OGFS}{\textit{Online Group Feature Selection}} 
+é uma proposta de \citeonline{Wang2015} para seleção de atributos \textit{online} que se baseia em análise espectral de grupos para realização da avaliação de quais atributos formam um subconjunto ótimo para definição das classes. Esse algoritmo foi testado tanto em conjunto de testes contendo textos quanto na classificação de imagens e apresentou bons resultados em ambos os casos.
+
+
+O problema é definido do seguinte modo: assuma uma matriz $X = [x_1, \dots, x_n] \in R^{d\times n}$, onde $d$ é a quantidade de atributos recebidos até o momento e $n$ a quantidade de tuplas; e um vetor contendo as classes das tuplas $Y=[y_1, \dots, y_n]^{T} \in \mathbb{R}^{n},y_i \in \{1, \dots, c\}$, onde $c$ é o número de classes. O espaço de atributos é um vetor dinâmico de fluxos de dados $F$, que consiste em grupos de atributos $F = [G_1, \dots, G_j]^{T} \in \mathbb{R}^{\sum d_j}$, onde $d_j$ é o número de atributos no grupo $G_j$. $G_j = [f_{j1}, f_{j2}, \dots, f_{jd_j}]^{T} \in  \mathbb{R}^{d_j}$ onde $f_{jk}$ é um atributo individual. Desse modo, em termos de um fluxo com atributos $F$ e um vetor de classes $Y$, o objetivo do algoritmo OFGS é selecionar um subconjunto de atributos ótimo $U = [g_1, \dots, g_j, \dots, g_k]^{T} \in \mathbb{R}^{\sum k_j}$, onde $g_j \in \mathbb{R}^{k_j}$ é o espaço de atributos selecionado de $G_j$, ou seja, $g_j \subseteq G_j$. Por fim, $k_j$ é a dimensão de atributos de $g_j$, para $0 \leq kj \leq d_j$. 
+
+Para resolver essa situação, \citeonline{Wang2015} propõem um \textit{framework} para seleção de grupos de atributos online, que consiste de dois componentes: a seleção intra-grupos e a seleção entre-grupos. A seleção intra-grupo é a etapa de processar cada atributo dinamicamente à medida que é recebido. Ou seja, quando um grupo de atributos $G_j$ é gerado, os atributos são processados individualmente e o algoritmo seleciona um subconjunto $G_j^{'}$. Em relação aos atributos obtidos pela seleção intra-grupo $G_j^{'}$, o algoritmo também considera a correlação entre grupos e obtém um subconjunto $g_j$. Essa última é a etapa de seleção entre-grupos. O Algoritmo~\ref{alg:ogfs} apresenta o pseudocódigo dessa solução.
+
+\bigskip
+
+\begin{algorithm}[!htb]
+   \SetAlgoLined
+   \Entrada{
+    \\ $ F \in \mathbb{R}^{m x q}$ : fluxo de atributos \\
+    $ Y \in \mathbb{R}^{n}$ : vetor com as classes}
+     \Saida{
+     \\ $U$: o subconjunto ótimo de atributos}
+   \Inicio{
+   
+   \Enqto{$ \psi (U) $ não for satisfeito} {
+      \Para{ $ j =1 \text{ até } q $} {
+         $G_j \leftarrow $ gera um novo grupo de atributos \\
+         \Para{ $ i =1 \text{ até } m$} {
+           $G_{j}^{'} = [ ] $ \\
+           $f_i \leftarrow $ novo atributo \\
+           /*** avalia o atributo $f_i$ pelos critérios 1,2 ***/ \\
+            \Se{$|F(f_i \cup  G_{j}^{'}) - F(G_{j}^{'})| > \epsilon$} {     
+              $G_{j}^{'} = G_{j}^{'} \cup f_i$
+            }
+		 }
+         $g_j \leftarrow $ encontra o subconjunto ótimo $G_{j}^{'}$ pelo algoritmo de busca \textit {feature-sign} \\
+         $U=U \cup g_j$ \\
+      }
+   }
+   
+   }
+   
+   \caption{\textsc{Online Group Feature Selection (OGFS)}}\label{alg:ogfs}
+ \end{algorithm}
+ 
+ \bigskip
+ 
+ O algoritmo OGFS é dividido em duas etapas: a seleção intra-grupos (passos 4-12) e a seleção entre grupos (passos 13-14). Na seleção intra-grupos, para cada atributo $f_i$ no grupo $G_j$, o algoritmo avalia cada um segundo sua relevância (passos 9-11). Com a inclusão de um novo atributo $f_i$, se a distância entre a classe interna é minimizada e a distância com as outras classes é maximizada, $f_i$ é considerado um ``bom'' atributo e é adicionado à $G_j^{'}$. Após a seleção intra-grupo, é obtido um subconjunto de atributos $G_j^{'}$. Para implementar a segunda etapa, o algoritmo utiliza um modelo de regressão linear (Lasso) baseado no melhor subconjunto já obtido $U$ e o recém selecionado $G_j^{'}$. As iterações continuam até a performance de $ \psi (U) $ atingir um limiar pré definido, sendo eles: 
+ 
+ \begin{itemize}
+ \item $|U| \geq k$, $k$ é o número de atributos que o algoritmo deve selecionar;
+ \item $accu(U) \geq max$, a acurácia do modelo baseado em $U$ atinge uma acurácia previamente definida como $max$;
+ \item Não existem mais atributos à serem recebidos.
+ \end{itemize}
+
+\section{Considerações finais deste capítulo}
+
+Este capítulo apresentou os principais algoritmos de seleção de atributos existentes na literatura, selecionados por sua capacidade de lidar com o processo de aprendizado \textit{online}, sua independência de classificadores (não são integrados ao processo de predição) e seus bons resultados ao lidarem com fluxos de dados. 
+Em resumo, as características dos métodos são as seguintes:
+
+\begin{itemize}
+\item O Método de Katakis permite a utilização de métodos de avaliação de atributos incrementais em conjunto com um algoritmo de classificação também incremental (como o NB ou o k-NN). 
+
+\item O FCBF utiliza o conceito de Incerteza Simétrica para avaliar os atributos. O OFS, um envelopador guloso, testa todas as possíveis variações de atributos até encontrar o subconjunto ótimo. 
+\item O OFGS possui bom desempenho tanto em conjunto de dados textuais quanto em bases de dados de imagens, e utiliza o conceito de clusterização espectral para realização da avaliação dos atributos. 
+\item O OSFS avalia a relevância e a redundância da combinação de atributos, até encontrar o modelo ótimo. 
+\item Por fim, O EFS, envelopador, utiliza o algoritmo MBW para avaliar os atributos a partir de um sistema de pesos.
+\end{itemize}
+
+
+
+
+
+

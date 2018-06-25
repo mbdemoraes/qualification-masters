@@ -1,0 +1,121 @@
+\chapter{Metodologia}\label{chp:metodologia}
+
+Este capítulo apresenta a metodologia para realização dos experimentos propostos neste trabalho. Neste sentido, são apresentadas as configurações do ambiente de execução dos testes, a ferramenta de \textit{benchmark} utilizada, as configurações e instruções de uso do projeto com os algoritmos testados, as características das bases de dados com mudança de conceito selecionadas e, por fim, a descrição dos experimentos realizados.
+O objetivo da metodologia proposta é observar os comportamentos dos algoritmos de seleção de atributos para, posteriormente, identificar pontos que podem ser melhorados em suas implementações.
+
+\section{Configuração do ambiente}\label{sec:met_config_amb}
+
+Para realização dos experimentos, este trabalho utiliza a ferramenta \textit{Massive Online Analysis} (MOA),  
+\nomenclature{MOA}{\textit{Massive Online Analysis}} 
+um \textit{framework} 
+de código aberto
+desenvolvido pela Universidade de Waikato, da Nova Zelândia, que permite a simulação e manipulação de fluxos de dados. O MOA é integrado com a ferramenta 
+\textit{Waikato Environment For Knowledge Analysis}
+(WEKA), 
+\nomenclature{WEKA}{\textit{Waikato Environment For Knowledge Analysis}} 
+desenvolvido pela mesma universidade. Essa ferramenta permite que um determinado conjunto de dados estático seja simulado como um fluxo de dados transmitido via rede. 
+
+Esse \textit{framework} foi escolhido por sua ampla utilização na literatura \cite{Bifet2010}, \cite{Turkov2016} e \cite{Ramirez-Gallego2017},
+por
+sua interface gráfica intuitiva e facilmente manipulável, por
+sua gratuidade e, por fim, por apresentar uma gama de ferramentas nativas para avaliar o desempenho de algoritmos e procedimentos de aprendizado de máquina aplicados 
+aos
+fluxos de dados, como classificadores, seletores de atributos, preditores e regressores, dentre outros. Desse modo, a ferramenta MOA opera como um \textit{software} de \textit{benchmark}, oferecendo o ambiente, 
+as
+condições e 
+as
+ferramentas para avaliação dos algoritmos de seleção de atributos propostos neste trabalho. São utilizadas as seguintes versões dos sistemas: MOA 
+2016.04 e WEKA 
+3.8.
+
+Por 
+ter código aberto
+, o MOA permite que sejam desenvolvidos e incluídos algoritmos em sua estrutura, 
+facilitando
+sua avaliação. Portanto, cada um dos algoritmos apresentados no 
+Capítulo~\ref{chp:levantamento}
+deve ser implementado nesta ferramenta. A linguagem de programação escolhida é a Java, 
+a
+mesma utilizada pelos sistemas MOA e WEKA, 
+selecionada
+para facilitar a integração entre os diferentes componentes, evitando quaisquer conflitos de comunicação com os demais componentes do MOA e do WEKA. 
+
+Todos os experimentos foram realizados em um único computador \textit{desktop}, com a seguinte 
+configuração
+: processador Intel Core i7-3770 (4 núcleos/8 \textit{threads}, 3.40 GHz, cache de 8M), 16 GB de memória RAM DDR3, 1 TB SATA HDD, conexão 
+internet via \textit{Wireless} e sistema operacional Ubuntu 16.04 LTS (Linux).
+
+\section{Estrutura do projeto}\label{sec:met_config}
+
+Pra que os algoritmos de seleção de atributos possam ser avaliados, a utilização de um classificador se faz necessária. Esse classificador deve receber o subconjunto ótimo de atributos e realizar a classificação dos fluxos de dados utilizando apenas os atributos selecionados. 
+
+%[Andre] Adicionei uma quebra de parágrafo
+Como classificador base para avaliação de desempenho dos algoritmos seleção de atributos, foi escolhida uma versão incremental do algoritmo NB. Essa escolha foi motivada por ser um classificador simples e flexível, por permitir a utilização de diferentes atributos ao longo do processo de classificação (incremental) e por sua prévia utilização na literatura como base para avaliação de algoritmos de seleção de atributos \cite{Ramirez-Gallego2017}.
+
+Para realização dos experimentos em diferentes cenários, definiu-se que deve ser possível selecionar qual método de seleção de atributos será utilizado, a quantidade de atributos que o método deve extrair ao final do processo e qual a janela de processamento (quantidade de fluxos processados por vez). As configurações e instruções de uso para reprodução na prática dos experimentos estão descritas no Apêndice~\ref{chp:ApendiceB}.
+
+
+
+\section{Métricas observadas}\label{sec:met_metricas} 
+
+Para avaliar o desempenho de algoritmos de seleção de atributos, as métricas corretas precisam ser observadas. Em se tratando de um algoritmo de seleção de atributos, o objetivo é reduzir a quantidade de atributos de um fluxo de dados, diminuindo sua complexidade e o tempo necessário para extração de conhecimento.
+
+Com a redução da quantidade de atributos de um fluxo de dados, os ganhos em termo de performance são consideráveis. Entretanto, um fator importante deve ser levado em consideração: a redução de dimensionalidade do fluxo de dados não deve impactar negativamente e de forma significativa a acurácia do classificador. A acurácia é uma das medidas mais importantes de um algoritmo de classificação, pois é o que mede o quanto o mesmo é eficiente na tarefa de classificar as tuplas. Desse modo, o primeiro fator a ser avaliado é \textbf{acurácia} do classificador, antes e depois da redução de dados. 
+
+Além da acurácia, é preciso avaliar o \textbf{tempo de resposta} do algoritmo. A adição de um procedimento de seleção de atributos em um processo de aprendizado \textit{online} não deve impactar significativamente de forma negativa o tempo de classificação dos fluxos. Isto porque
+as características inerente dos fluxos de dados -- transmissão em tempo real, com alta velocidade e em grande volume -- fazem com que qualquer aumento no tempo de resposta  implique em uma sobrecarga na fila de espera dos operadores. 
+
+Por fim, o algoritmo não deve consumir demasiadamente os recursos computacionais da máquina em que executa, visto que esses algoritmos executam em sistemas CEP que possuem, em muitos casos, recursos limitados e compartilhados com diversas outras aplicações. Portanto, um aumento no consumo dos recursos computacionais pode comprometer toda a operação do sistema. Portanto, um fator a ser estudado é o \textbf{consumo de memória RAM}.
+
+\section{Bases de dados}\label{sec:met_bases} 
+As características das bases de dados selecionadas para este trabalho são apresentadas na Tabela~\ref{tab:bases}. A base \textit{spam\_data} utiliza uma parte da coleção de dados da plataforma \textit{Spam Assassin}, uma ferramenta anti-spam mantida pela empresa Apache. Composta por duas classes (\textit{legitimate} e \textit{spam}), é utilizada em problemas de classificação para definir se um e-mail é legítimo ou se enquadra como \textit{spam}. A taxa de tuplas \textit{spams} é de 20\%. 
+
+O conjunto \textit{mailing\_list} é referente à grupos de interesse de notícias de um determinado usuário. Essas bases foram criadas para simular o cenário de um usuário que se inscreve e remove sua inscrição de diferentes listas de e-mails (ou \textit{feeds} de notícias, i.e. esportes, saúde e cidade, dentre outros), mas de fato se interessa apenas por uma determinada quantidade de tópicos de interesse. Desse modo, é possível simular tanto mudanças de conceito súbitas, onde em determinado momento o usuário se interessa por um tópico específico (e.g. esportes), mas de repente cancela sua inscrição nesta lista e se inscreve em outra (e.g. saúde).
+
+
+As bases \textit{incremental\_drift}, \textit{gradual\_drift}, \textit{sudden\_drift} e \textit{recurring\_drift} foram geradas artificialmente através do MOA. A \textit{incremental\_drift} simula a mudança de conceito incremental, realizada através de variações de peso dentro de um hiperplano geométrico. Um hiperplano é um plano $n - 1$ dimensional, onde é possível variar sua orientação e posição variando os tamanhos dos pesos $w_i$. Desse modo, é possível simular a mudança de conceito incremental, que simula as mudanças de peso do hiperplano de forma gradativa. 
+
+As bases \textit{gradual\_drift} e \textit{sudden\_drift} simulam as mudanças de conceito gradual e súbita, respectivamente. Ambas são compostas por seis atributos numéricos, que variam de 0 a 10, sendo apenas quatro deles relevantes e 100.000 tuplas, distribuídos em duas classes. A base \textit{recurring\_drift} também utiliza o mesmo tipo de atributo, mas simula as mudanças de conceito recorrentes, por retomar conceitos já conhecidos previamente. Essa base conta com 12 atributos. 
+
+\begin{table}[!ht]
+\centering
+\caption{Bases de dados selecionadas e suas características}
+\label{tab:bases}
+%[Andre] Deixei todas as colunas centralizadas, exceto a primeira.
+\begin{tabular}{lccccc}
+\hline
+Conjunto de dados & Tuplas & Atributos & Classes & Mudança de Conceito & Artificial\\ \hline
+spam\_data & 9.324 & 40.000 & 2 & Gradual & Não \\ 
+mailing\_list & 6.000 & 28.000 & 2 & Súbita & Não \\
+incremental\_drift & 100.000 & 6 & 2 & Incremental & Sim \\ 
+gradual\_drift & 100.000 & 6 & 2 & Gradual & Sim \\ 
+sudden\_drift & 100.000 & 6 & 2 & Súbita & Sim \\ 
+recurring\_drift & 100.000 & 12 & 2 & Recorrente & Sim \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\section{Experimentos}\label{sec:met_testes} 
+
+Para uma correta verificação dos algoritmos, uma abordagem de avaliação \textit{online} será utilizada. Essa abordagem, conhecida como teste-depois-treinamento intercalado (\textit{interleaved test-then-train}), foi proposta por \citeonline{Bifet2011} e define que cada tupla pode ser utilizada para avaliar o modelo antes de ser usado para a etapa de treinamento. Desse modo, sempre que uma nova tupla é recebida, o modelo será testado, trabalhando de forma incremental. Essa avaliação está disponível para uso no MOA.
+
+Portanto, os seguintes experimentos serão realizados:
+
+\begin{itemize}
+\item \textbf{Caso de Teste 1}: utilização do algoritmo NB incremental sem nenhuma seleção de atributos. 
+
+\item \textbf{Caso de Teste 2}: utilização de cada algoritmo de seleção de atributos em conjunto com o NB. Para as bases reais, os parâmetros serão $winSize = 1$, $numFeatures = 4, 10$ e $100$, $fsMethod = 1$ e $3$. Para as bases artificiais, os valores dos parâmetros adotados será: $winSize = 1$, $numFeatures = 4$ e $fsMethod=1$ e $3$.
+
+\item \textbf{Caso de Teste 3}: variação da janela de processamento ($winSize$) entre $10$, $100$ e $1000$.
+\end{itemize}
+
+Cada experimento será repetido 10 vezes. Os resultados apresentados se referem à média aritmética dos valores obtidos em cada execução. Para o algoritmo OFS, considerou-se $\lambda=0.01$ e $\eta= 0.02$, de acordo com os critérios propostos pelo autor \cite{Wang2014}.
+
+\section{Considerações finais deste capítulo}
+
+Este capítulo apresentou a metodologia desenvolvida neste trabalho, com as configurações de ambiente e de execução, da ferramenta MOA, das bases de dados e dos experimentos realizados, caracterizando cada caso de testes.
+
+Em suma, foram selecionados seis conjuntos de dados, cada um com um tipo de mudança de conceito diferente. Dois desses conjuntos são artificiais e os demais quatro conjuntos são reais. As mudanças de conceito que os conjuntos de dados apresentam são a Gradual, a Incremental, a Recorrente e a Súbita.
+
+Além disso, são propostos três casos de testes. O primeiro é o caso base, sem nenhuma seleção de atributos. Esse caso será usado como referência. No segundo caso de teste, variarão o tamanho da janela, a quantidade de atributos e os algoritmos de seleção de atributos. Finalmente, no terceiro caso, o tamanho da janela variará. Ao observar os resultados desses testes e as métricas selecionadas (acurácia, tempo de resposta e consumo de memória principal), a expectativa é identificar que aspectos podem ser melhorados nos algoritmos. O Capítulo~\ref{chp:resultados} a seguir apresenta alguns resultados parciais.
